@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Marathon Map - Medellín</title>
+  <link rel="stylesheet" href="https://<**URL**>/bootstrap-3.3.7.min.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.2/css/all.css" integrity="sha384-/rXc/GQVaYpyDdyxK+ecHPVYJSN9bmVFBvjA/9eOB+pb3F2w2N6fc5qB9Ew5yIns" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://<**URL**>/styles-3.3.7b.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:300,300i,400,400i,500,500i,600,600i,700,700i">
+  <style>
+    .loader {
+      position: relative;
+      border: 3px solid #CCCCCC;
+      border-radius: 50%;
+      border-top: 3px solid #30A5FF;
+      width: 35px;
+      height: 35px;
+      -webkit-animation: spin 1s linear infinite;
+      /* Safari */
+      animation: spin 1s linear infinite;
+    }
+    /* Safari */
+    @-webkit-keyframes spin {
+      0% {
+        -webkit-transform: rotate(0deg);
+      }
+      100% {
+        -webkit-transform: rotate(360deg);
+      }
+    }
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body style="padding: 0;">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="panel panel-default">
+          <div class="panel-heading clearfix">Datos Participante</div>
+          <div class="panel-body">
+            <!--Form-->
+            <div id="message_display" class="alert alert-warning" role="alert" style="display:none; text-align: center;"></div>
+            <form role="form" method="post" id="formData">
+              Digite los datos del participante<br /><br />
+              <div class="form-group">
+                <label for="name"> Nombre:</label>
+                <input type="text" class="form-control" id="name" name="name" maxlength="80">
+              </div>
+              <div class="form-group">
+                <label for="pace"> Paso promedio ( HH:MM:SS ):</label>
+                <input type="text" class="form-control" id="pace" name="pace" maxlength="8" placeholder="00:04:30">
+              </div>
+              <input type="submit" class="btn btn-primary btn-block" id="submit-button" value="Enviar" onclick="submitData('#formData'); return false;">
+            </form>
+            <!--/UpdateForm-->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--/.main-->
+  <!--JS-->
+  <script src="https://<**URL**>/jquery-1.11.1.min.js"></script>
+  <script src="https://<**URL**>/bootstrap-3.3.7.min.js"></script>
+  <!--/JS-->
+  <script>
+    // Envío de los datos
+    function submitData( FormId ) {
+      showMsg('Generando el URL del mapa', '#message_display');
+      showWorking('#message_display');
+      var parameters = {};
+      // Obtiene los valores de los campos de la forma. Ya vienen validados 
+      $.each( $(FormId).serializeArray(), function( i, field ) { parameters[ field.name ] = field.value; } );
+      google.script.run
+        .withSuccessHandler(
+          function getResult( res ) {
+            showMsg( res , '#message_display');            
+          })
+        .getUrlMap( parameters );
+    }
+    // Display working spinner
+    function showWorking(display) {
+      var spinner = '<div class="container"><div class="loader"></div><div>';
+      $(display).append(spinner);
+      $(display).show();
+    }
+    // Display message
+    function showMsg(message, display) {
+      $(window).scrollTop(0);
+      $(display).html(message).show();
+    }
+  </script>
+</body>
+</html>
