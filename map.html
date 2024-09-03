@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Marathon Map - Medellín</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    ##CSS##
+</head>
+<body>
+    <div id="map"></div>
+    <div id="data" style="font-family: Helvetica; margin: 25px 25px 75px 100px;">
+      Atleta: <strong>##NAME##</strong><br />
+      Pace: ##PACE##<br/>
+      Hora Inicio: ##STARTTIME##<br />
+      Hora Final Estimada: <strong>##ENDTIME##</strong></br />
+      Tiempo Total Estimado: <strong>##TIME##</strong><br />
+    </div>
+    <script>
+        (g=>{
+          var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});
+          var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));
+          e.set("libraries",[...r]+"");
+          for(k in g) e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);
+          e.set("callback",c+".maps."+q);
+          a.src=`https:\/\/maps.${c}apis.com\/maps\/api\/js?`+e;
+          d[q]=f;
+          a.onerror=()=>h=n(Error(p+" could not load."));
+          a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));
+          d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
+          ({key: "<**APIKEY**>",v: "weekly"});
+      </script>
+
+      <script>
+        // Arreglo de los Checkpoints
+        ##CHECKPOINTS##
+        // Arreglo de las coordenadas
+        ##COORDINATES##
+        // Inicialización del mapa
+        async function initMap() {
+            // Request needed libraries.
+            const { Map } = await google.maps.importLibrary("maps");
+            const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+            // Map
+            const map = new Map(document.getElementById("map"), {
+                center: { lat: 6.24442, lng: -75.57844 },
+                zoom: 14,
+                mapId: "1orsO5Gjnuz9Jpo7HvqmCVdxyE7Q8pLE"
+            });
+            // Recorrido de la maratón - La coordenadas se toman desde el archivo coordinates.html y se reemplazan en ##COORDINATES##
+            const marathonPath = new google.maps.Polyline({
+                path: coordinates,
+                geodesic: true,
+                strokeColor: "#5cc9b8",
+                strokeOpacity: 1.0,
+                strokeWeight: 5,
+            });
+            marathonPath.setMap(map);
+            // Creación de los puntos de chequeo
+            for (const cpoint of checkpoints) {
+                const AdvancedMarkerElement = new google.maps.marker.AdvancedMarkerElement({
+                    map,
+                    content: buildContent(cpoint),
+                    position: cpoint.position,
+                    title: cpoint.title,
+                });
+                // Comportamiento
+                AdvancedMarkerElement.addListener("click", () => {
+                    toggleHighlight(AdvancedMarkerElement, cpoint);
+                });
+            };
+        };
+        /**
+         * toggleHighlight
+        */
+        function toggleHighlight(markerView, cpoint) {
+            if (markerView.content.classList.contains("highlight")) {
+                markerView.content.classList.remove("highlight");
+                markerView.zIndex = null;
+            } else {
+                markerView.content.classList.add("highlight");
+                markerView.zIndex = 1;
+            }
+        }
+        /** 
+         * buildContent
+        */
+        function buildContent(cpoint) {
+            const content = document.createElement("div");
+            content.classList.add("cpoint");
+            content.innerHTML = `
+                <div class="icon">
+                    <i aria-hidden="true" class="fas fa-icon fa-${cpoint.type}" title="${cpoint.type}"></i>
+                    <span class="fa-sr-only">${cpoint.type}</span>
+                </div>
+                <div class="details">
+                    <div class="time">Hora est: ${cpoint.time}</div>
+                    <div class="address">${cpoint.address}</div>
+                    <div class="features">
+                        <div>
+                            <i aria-hidden="true" class="fas fa-clock" title="time"></i>
+                            <span class="fa-sr-only">Tiempo estimado:</span>
+                            <span>${cpoint.acum}</span>
+                        </div>
+                        <div>
+                            <i aria-hidden="true" class="fa fa-ruler fa-lg size" title="dist"></i>
+                            <span class="fa-sr-only">Dist</span>
+                            <span>${cpoint.dist} km</span>
+                        </div>
+                    </div>
+                </div>`;
+            return content;
+        }
+        // Inicialización del mapa
+        initMap();
+    </script>
+</body>
+</html>
